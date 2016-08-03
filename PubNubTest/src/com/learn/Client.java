@@ -1,102 +1,53 @@
 package com.learn;
 
-import java.util.Arrays;
 
-import com.pubnub.api.PNConfiguration;
-import com.pubnub.api.PubNub;
-import com.pubnub.api.callbacks.PNCallback;
-import com.pubnub.api.callbacks.SubscribeCallback;
-import com.pubnub.api.enums.PNStatusCategory;
-import com.pubnub.api.models.consumer.PNPublishResult;
-import com.pubnub.api.models.consumer.PNStatus;
-import com.pubnub.api.models.consumer.pubsub.PNMessageResult;
-import com.pubnub.api.models.consumer.pubsub.PNPresenceEventResult;
+import com.pubnub.api.*;
+
+import org.json.*;
 
 public class Client {
 
 	public static void main(String[] args) {
-		PNConfiguration pnConfiguration = new PNConfiguration();
-	    pnConfiguration.setSubscribeKey("demo");
-	    pnConfiguration.setPublishKey("demo");
-	     
-	    PubNub pubNub = new PubNub(pnConfiguration);
-	 
-	    pubNub.addListener(new SubscribeCallback() {
-	        @Override
-	        public void status(PubNub pubnub, PNStatus status) {
-	 
-	 
-	            if (status.getCategory() == PNStatusCategory.PNUnexpectedDisconnectCategory) {
-	                // This event happens when radio / connectivity is lost
-	            }
-	 
-	            else if (status.getCategory() == PNStatusCategory.PNConnectedCategory) {
-	 
-	                // Connect event. You can do stuff like publish, and know you'll get it.
-	                // Or just use the connected event to confirm you are subscribed for
-	                // UI / internal notifications, etc
-	             
-	                if (status.getCategory() == PNStatusCategory.PNConnectedCategory){
-	                    pubnub.publish().channel("awesomeChannel").message("hello!!").async(new PNCallback<PNPublishResult>() {
-	                        @Override
-	                        public void onResponse(PNPublishResult result, PNStatus status) {
-	                            // Check whether request successfully completed or not.
-	                            if (!status.isError()) {
-	 
-	                                // Message successfully published to specified channel.
-	                            }
-	                            // Request processing failed.
-	                            else {
-	 
-	                                // Handle message publish error. Check 'category' property to find out possible issue
-	                                // because of which request did fail.
-	                                //
-	                                // Request can be resent using: [status retry];
-	                            }
-	                        }
-	                    });
-	                }
-	            }
-	            else if (status.getCategory() == PNStatusCategory.PNReconnectedCategory) {
-	 
-	                // Happens as part of our regular operation. This event happens when
-	                // radio / connectivity is lost, then regained.
-	            }
-	            else if (status.getCategory() == PNStatusCategory.PNDecryptionErrorCategory) {
-	 
-	                // Handle messsage decryption error. Probably client configured to
-	                // encrypt messages and on live data feed it received plain text.
-	            }
-	        }
-	 
-	        @Override
-	        public void message(PubNub pubnub, PNMessageResult message) {
-	            // Handle new message stored in message.data.message
-	            if (message.getActualChannel() != null) {
-	                // Message has been received on channel group stored in
-	                // message.getActualChannel()
-	            }
-	            else {
-	                // Message has been received on channel stored in
-	                // message.getSubscribedChannel()
-	            }
-	 
-	            /*
-	                log the following items with your favorite logger
-	                    - message.getMessage()
-	                    - message.getSubscribedChannel()
-	                    - message.getTimetoken()
-	            */
-	        }
-	 
-	        @Override
-	        public void presence(PubNub pubnub, PNPresenceEventResult presence) {
-	 
-	        }
-	    });
-	 
-	    pubNub.subscribe().channels(Arrays.asList("awesomeChannel!")).execute();
-
+		Pubnub pubnub = new Pubnub("pub-c-8b43c1f6-9f41-4c34-8033-a32f9c16ac36", "sub-c-f55ce1aa-4fcb-11e6-82fe-0619f8945a4f");
+		
+		try {
+			  pubnub.subscribe("my_channel", new Callback() {
+			      @Override
+			      public void connectCallback(String channel, Object message) {
+			          pubnub.publish("my_channel", "Hello from the PubNub Java SDK", new Callback() {});
+			      }
+			 
+			      @Override
+			      public void disconnectCallback(String channel, Object message) {
+			          System.out.println("SUBSCRIBE : DISCONNECT on channel:" + channel
+			                     + " : " + message.getClass() + " : "
+			                     + message.toString());
+			      }
+			 
+			      public void reconnectCallback(String channel, Object message) {
+			          System.out.println("SUBSCRIBE : RECONNECT on channel:" + channel
+			                     + " : " + message.getClass() + " : "
+			                     + message.toString());
+			      }
+			 
+			      @Override
+			      public void successCallback(String channel, Object message) {
+			          System.out.println("SUBSCRIBE : " + channel + " : "
+			                     + message.getClass() + " : " + message.toString());
+			      }
+			 
+			      @Override
+			      public void errorCallback(String channel, PubnubError error) {
+			          System.out.println("SUBSCRIBE : ERROR on channel " + channel
+			                     + " : " + error.toString());
+			      }
+			    }
+			  );
+			} catch (PubnubException e) {
+			  System.out.println(e.toString());
+			}
+		
+		
 	}
 
 }

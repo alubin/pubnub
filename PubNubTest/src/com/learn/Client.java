@@ -14,7 +14,8 @@ public class Client {
 			  pubnub.subscribe("my_channel", new Callback() {
 			      @Override
 			      public void connectCallback(String channel, Object message) {
-			          pubnub.publish("my_channel", "Hello from the PubNub Java SDK", new Callback() {});
+//			          pubnub.publish("my_channel", (String)message, new Callback() {});
+//			    	  System.out.println("I received " + message);
 			      }
 			 
 			      @Override
@@ -32,8 +33,10 @@ public class Client {
 			 
 			      @Override
 			      public void successCallback(String channel, Object message) {
-			          System.out.println("SUBSCRIBE : " + channel + " : "
-			                     + message.getClass() + " : " + message.toString());
+//			          System.out.println("SUBSCRIBE : " + channel + " : "
+//			                     + message.getClass() + " : " + message.toString());
+			          
+			          System.out.println("I received " + message.toString() + " of Type: " + message.getClass() + " on channel: "+ channel);
 			      }
 			 
 			      @Override
